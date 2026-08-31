@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Rural Mesh Network</title>
+
+  <!-- MapLibre -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/maplibre-gl@6.3.0/dist/maplibre-gl.css"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: white;
+    }
+
+    #app {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: 100vh;
+    }
+
+    /* -------------------
+       SIDEBAR
+    ------------------- */
+
+    #sidebar {
+      padding: 20px;
+      background: #111827;
+      overflow-y: auto;
+    }
+
+    #sidebar h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    #sidebar p {
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      margin-bottom: 20px;
+      border-radius: 20px;
+      background: #14532d;
+      color: #bbf7d0;
+      font-size: 13px;
+    }
+
+    .section {
+      margin-top: 25px;
+    }
+
+    .section h2 {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      letter-spacing: 1px;
+    }
+
+    .node-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .node-item {
+      padding: 10px;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .node-item:hover {
+      background: #1f2937;
+    }
+
+    .node-name {
+      font-weight: bold;
+    }
+
+    .node-meta {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    #planningButton {
+      background: #2563eb;
+      color: white;
+    }
+
+    #clearButton {
+      background: #374151;
+      color: white;
+    }
+
+    #planningButton.active {
+      background: #dc2626;
+    }
+
+    /* -------------------
+       MAP
+    ------------------- */
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* -------------------
+       MAP POPUP
+    ------------------- */
+
+    .maplibregl-popup-content {
+      color: #111827;
+      min-width: 220px;
+    }
+
+    .popup-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .popup-status {
+      margin-bottom: 8px;
+    }
+
+    .online {
+      color: green;
+    }
+
+    .offline {
+      color: red;
+    }
+
+    .proposed {
+      color: #d97706;
+    }
+
+    /* -------------------
+       MOBILE
+    ------------------- */
+
+    @media (max-width: 700px) {
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      #sidebar {
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+
+    <h1>Rural Mesh</h1>
+
+    <div class="status">
+      ● Network Online
+    </div>
+
+    <p>
+      Experimental Meshtastic network planning dashboard.
+    </p>
+
+    <div class="section">
+
+      <h2>Network</h2>
+
+      <div id="nodeList" class="node-list"></div>
+
+    </div>
+
+    <div class="section">
+
+      <h2>Planning</h2>
+
+      <button id="planningButton">
+        Enter Planning Mode
+      </button>
+
+      <button id="clearButton">
+        Remove Proposed Nodes
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+</div>
+
+
+<script type="module">
+
+  import * as maplibregl
+    from "https://unpkg.com/maplibre-gl@6.3.0/dist/maplibre-gl.mjs";
+
+
+  /* =====================================================
+     CONFIGURATION
+  ===================================================== */
+
+  // Change this to your region.
+  //
+  // IMPORTANT:
+  // MapLibre coordinates are:
+  //
+  // [ longitude, latitude ]
+  //
+  // NOT [ latitude, longitude ]
+
+  const MAP_CENTER = [-59.44, -21.68];
+
+
+  /* =====================================================
+     FAKE MESHTASTIC NODES
+  ===================================================== */
+
+  let nodes = [
+
+    {
+      id: "relay-hill",
+      name: "Hill Relay",
+      type: "repeater",
+
+      coordinates: [-59.44, -21.68],
+
+      status: "online",
+
+      battery: 94,
+      snr: 7.2
+    },
+
+    {
+      id: "farm-house",
+      name: "Farm House",
+      type: "gateway",
+
+      coordinates: [-60.45, -20.62],
+
+      status: "online",
+
+      battery: 100,
+      snr: 5.6
+    },
+
+    {
+      id: "water-tank",
+      name: "Water Tank",
+      type: "sensor",
+
+      coordinates: [-58.34, -34.61],
+
+      status: "online",
+
+      battery: 81,
+      snr: 3.8
+    },
+
+    {
+      id: "pump-station",
+      name: "Pump Station",
+      type: "automation",
+
+      coordinates: [-58.38, -34.67],
+
+      status: "offline",
+
+      battery: 62,
+      snr: -1.2
+    }
+
+  ];
+
+
+  /* =====================================================
+     FAKE MESH CONNECTIONS
+  ===================================================== */
+
+  let links = [
+
+    ["farm-house", "relay-hill"],
+
+    ["relay-hill", "water-tank"],
+
+    ["relay-hill", "pump-station"]
+
+  ];
+
+
+  /* =====================================================
+     CREATE MAP
+  ===================================================== */
+
+const map = new maplibregl.Map({
+
+  container: "map",
+
+  center: MAP_CENTER,
+
+  zoom: 10,
+
+  style: {
+
+    version: 8,
+
+    sources: {
+
+      satellite: {
+
+        type: "raster",
+
+        tiles: [
+          "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
+        ],
+
+        tileSize: 256
+
+      }
+
+    },
+
+    layers: [
+
+      {
+        id: "satellite",
+        type: "raster",
+        source: "satellite"
+      }
+
+    ]
+
+  }
+
+});
+
+
+  /* =====================================================
+     MAP CONTROLS
+  ===================================================== */
+
+  map.addControl(
+    new maplibregl.NavigationControl(),
+    "top-right"
+  );
+
+
+  /* =====================================================
+     CONVERT NODES TO GEOJSON
+  ===================================================== */
+
+  function createNodeGeoJSON() {
+
+    return {
+
+      type: "FeatureCollection",
+
+      features: nodes.map(node => ({
+
+        type: "Feature",
+
+        geometry: {
+
+          type: "Point",
+
+          coordinates: node.coordinates
+
+        },
+
+        properties: {
+
+          ...node
+
+        }
+
+      }))
+
+    };
+
+  }
+
+
+  /* =====================================================
+     CONVERT LINKS TO GEOJSON
+  ===================================================== */
+
+  function createLinkGeoJSON() {
+
+    const features = [];
+
+    for (const link of links) {
+
+      const nodeA =
+        nodes.find(node => node.id === link[0]);
+
+      const nodeB =
+        nodes.find(node => node.id === link[1]);
+
+      if (!nodeA || !nodeB) {
+        continue;
+      }
+
+      features.push({
+
+        type: "Feature",
+
+        properties: {
+
+          from: nodeA.id,
+
+          to: nodeB.id
+
+        },
+
+        geometry: {
+
+          type: "LineString",
+
+          coordinates: [
+
+            nodeA.coordinates,
+
+            nodeB.coordinates
+
+          ]
+
+        }
+
+      });
+
+    }
+
+    return {
+
+      type: "FeatureCollection",
+
+      features
+
+    };
+
+  }
+
+
+  /* =====================================================
+     MAP LOAD
+  ===================================================== */
+
+  map.on("load", () => {
+
+
+    /* -------------------
+       CONNECTIONS
+    ------------------- */
+
+    map.addSource("mesh-links", {
+
+      type: "geojson",
+
+      data: createLinkGeoJSON()
+
+    });
+
+
+    map.addLayer({
+
+      id: "mesh-links",
+
+      type: "line",
+
+      source: "mesh-links",
+
+      paint: {
+
+        "line-color": "#2563eb",
+
+        "line-width": 3,
+
+        "line-opacity": 0.8
+
+      }
+
+    });
+    map.addSource("terrain-dem", {
+        type: "raster-dem",
+        url: "https://tiles.mapterhorn.com/tilejson.json"
+    });
+
+    map.setTerrain({
+        source: "terrain-dem",
+        exaggeration: 1
+    });
+
+    map.addLayer({
+        id: "hillshade",
+        type: "hillshade",
+        source: "terrain-dem",
+        paint: {
+            "hillshade-exaggeration": 0.35
+        }
+    });
+
+
+    /* -------------------
+       NODES
+    ------------------- */
+
+    map.addSource("mesh-nodes", {
+
+      type: "geojson",
+
+      data: createNodeGeoJSON()
+
+    });
+
+
+    map.addLayer({
+
+      id: "mesh-nodes",
+
+      type: "circle",
+
+      source: "mesh-nodes",
+
+      paint: {
+
+        "circle-radius": 9,
+
+        "circle-stroke-width": 3,
+
+        "circle-stroke-color": "#ffffff",
+
+        /*
+         * Change the node color
+         * depending on status.
+         */
+
+        "circle-color": [
+
+          "match",
+
+          ["get", "status"],
+
+          "online",
+          "#22c55e",
+
+          "offline",
+          "#ef4444",
+
+          "proposed",
+          "#f59e0b",
+
+          "#6b7280"
+
+        ]
+
+      }
+
+    });
+
+
+    /* -------------------
+       NODE LABELS
+    ------------------- */
+
+    map.addLayer({
+
+      id: "node-labels",
+
+      type: "symbol",
+
+      source: "mesh-nodes",
+
+      layout: {
+
+        "text-field": ["get", "name"],
+
+        "text-size": 13,
+
+        "text-offset": [0, 1.5],
+
+        "text-anchor": "top"
+
+      },
+
+      paint: {
+
+        "text-color": "#ffffff",
+
+        "text-halo-color": "#111827",
+
+        "text-halo-width": 2
+
+    }
+
+    });
+
+
+    refreshSidebar();
+
+  });
+
+
+  /* =====================================================
+     NODE CLICK POPUP
+  ===================================================== */
+
+  map.on(
+    "click",
+    "mesh-nodes",
+    event => {
+
+      const feature =
+        event.features[0];
+
+      const props =
+        feature.properties;
+
+      const coordinates =
+        feature.geometry.coordinates.slice();
+
+
+      const popupHTML = `
+
+        <div class="popup-title">
+          ${props.name}
+        </div>
+
+        <div>
+          Type:
+          <strong>${props.type}</strong>
+        </div>
+
+        <div class="popup-status ${props.status}">
+          ● ${props.status}
+        </div>
+
+        <hr>
+
+        <div>
+          Battery:
+          <strong>${props.battery}%</strong>
+        </div>
+
+        <div>
+          SNR:
+          <strong>${props.snr} dB</strong>
+        </div>
+
+        <br>
+
+        <small>
+          Node ID:
+          ${props.id}
+        </small>
+
+      `;
+
+
+      new maplibregl.Popup()
+
+        .setLngLat(coordinates)
+
+        .setHTML(popupHTML)
+
+        .addTo(map);
+
+    }
+  );
+
+
+  /* =====================================================
+     CURSOR EFFECT
+  ===================================================== */
+
+  map.on(
+    "mouseenter",
+    "mesh-nodes",
+    () => {
+
+      map.getCanvas().style.cursor =
+        "pointer";
+
+    }
+  );
+
+
+  map.on(
+    "mouseleave",
+    "mesh-nodes",
+    () => {
+
+      map.getCanvas().style.cursor =
+        "";
+
+    }
+  );
+
+
+  /* =====================================================
+     PLANNING MODE
+  ===================================================== */
+
+  let planningMode = false;
+
+  let proposedNodeCounter = 1;
+
+
+  const planningButton =
+    document.getElementById(
+      "planningButton"
+    );
+
+
+  planningButton.addEventListener(
+    "click",
+    () => {
+
+      planningMode =
+        !planningMode;
+
+
+      if (planningMode) {
+
+        planningButton.textContent =
+          "Exit Planning Mode";
+
+        planningButton.classList.add(
+          "active"
+        );
+
+        map.getCanvas().style.cursor =
+          "crosshair";
+
+      }
+
+      else {
+
+        planningButton.textContent =
+          "Enter Planning Mode";
+
+        planningButton.classList.remove(
+          "active"
+        );
+
+        map.getCanvas().style.cursor =
+          "";
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     CLICK MAP → ADD PROPOSED NODE
+  ===================================================== */
+
+  map.on(
+    "click",
+    event => {
+
+      /*
+       * Don't add nodes unless
+       * planning mode is enabled.
+       */
+
+      if (!planningMode) {
+        return;
+      }
+
+
+      /*
+       * Don't add another point if
+       * the user clicked an existing node.
+       */
+
+      const existingFeatures =
+        map.queryRenderedFeatures(
+          event.point,
+          {
+            layers: ["mesh-nodes"]
+          }
+        );
+
+
+      if (existingFeatures.length > 0) {
+        return;
+      }
+
+
+      const newNode = {
+
+        id:
+          `proposed-${proposedNodeCounter}`,
+
+        name:
+          `Proposed Node ${proposedNodeCounter}`,
+
+        type:
+          "proposed",
+
+        coordinates: [
+
+          Number(
+            event.lngLat.lng.toFixed(6)
+          ),
+
+          Number(
+            event.lngLat.lat.toFixed(6)
+          )
+
+        ],
+
+        status:
+          "proposed",
+
+        battery:
+          100,
+
+        snr:
+          0
+
+      };
+
+
+      proposedNodeCounter++;
+
+      nodes.push(newNode);
+
+
+      /*
+       * For demonstration purposes,
+       * connect the new node to the
+       * Hill Relay.
+       */
+
+      links.push([
+
+        "relay-hill",
+
+        newNode.id
+
+      ]);
+
+
+      updateMap();
+
+    }
+  );
+
+
+  /* =====================================================
+     REMOVE PROPOSED NODES
+  ===================================================== */
+
+  document
+    .getElementById("clearButton")
+    .addEventListener(
+      "click",
+      () => {
+
+        nodes =
+          nodes.filter(
+            node =>
+              node.status !==
+              "proposed"
+          );
+
+
+        links =
+          links.filter(
+            link => {
+
+              const a =
+                nodes.find(
+                  node =>
+                    node.id === link[0]
+                );
+
+              const b =
+                nodes.find(
+                  node =>
+                    node.id === link[1]
+                );
+
+              return a && b;
+
+            }
+          );
+
+
+        updateMap();
+
+      }
+    );
+
+
+  /* =====================================================
+     UPDATE MAP
+  ===================================================== */
+
+  function updateMap() {
+
+    const nodeSource =
+      map.getSource(
+        "mesh-nodes"
+      );
+
+    const linkSource =
+      map.getSource(
+        "mesh-links"
+      );
+
+
+    if (nodeSource) {
+
+      nodeSource.setData(
+        createNodeGeoJSON()
+      );
+
+    }
+
+
+    if (linkSource) {
+
+      linkSource.setData(
+        createLinkGeoJSON()
+      );
+
+    }
+
+
+    refreshSidebar();
+
+  }
+
+
+  /* =====================================================
+     SIDEBAR NODE LIST
+  ===================================================== */
+
+  function refreshSidebar() {
+
+    const list =
+      document.getElementById(
+        "nodeList"
+      );
+
+
+    list.innerHTML = "";
+
+
+    for (const node of nodes) {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "node-item";
+
+
+      item.innerHTML = `
+
+        <div class="node-name">
+
+          ${node.status === "online"
+            ? "🟢"
+            : node.status === "offline"
+            ? "🔴"
+            : "🟠"}
+
+          ${node.name}
+
+        </div>
+
+        <div class="node-meta">
+
+          ${node.type}
+          •
+          ${node.battery}% battery
+
+        </div>
+
+      `;
+
+
+      item.addEventListener(
+        "click",
+        () => {
+
+          map.flyTo({
+
+            center:
+              node.coordinates,
+
+            zoom:
+              14
+
+          });
+
+        }
+      );
+
+
+      list.appendChild(
+        item
+      );
+
+    }
+
+  }
+
+</script>
+
+</body>
+</html>
