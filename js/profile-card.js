@@ -1,12 +1,94 @@
 window.addEventListener("DOMContentLoaded", async function () {
     const enableLogging = true;
-    async function get(url) {
-        const resp = await fetch(url);
-        if (!resp.ok) {
-            console.error(`Error fetching data from ${url}: ${resp.statusText}`);
-            throw new Error(`HTTP error! status: ${resp.status}`);
+    async function get(url, cacheDuration = 60 * 60 * 1000) {
+        const cacheKey = `api-cache:${url}`;
+        const cachedRaw = localStorage.getItem(cacheKey);
+
+        if (cachedRaw) {
+            try {
+                const cached = JSON.parse(cachedRaw);
+
+                const isFresh =
+                    Date.now() - cached.timestamp < cacheDuration;
+
+                if (isFresh) {
+                    if (enableLogging) {
+                        console.log(`Using cached data for: ${url}`);
+                    }
+
+                    return cached.data;
+                }
+            } catch (error) {
+                console.warn("Invalid cached data, removing it:", error);
+                localStorage.removeItem(cacheKey);
+            }
         }
-        return resp.json();
+
+        try {
+            if (enableLogging) {
+                console.log(`Fetching fresh data from: ${url}`);
+            }
+
+            const resp = await fetch(url);
+
+            if (!resp.ok) {
+                console.error(
+                    `Error fetching data from ${url}: ${resp.status} ${resp.statusText}`
+                );
+
+                // GitHub rate limit or temporary API error:
+                // use expired cache if available
+                if (cachedRaw) {
+                    try {
+                        const cached = JSON.parse(cachedRaw);
+
+                        console.warn(
+                            `API unavailable. Using stale cached data for: ${url}`
+                        );
+
+                        return cached.data;
+                    } catch (error) {
+                        console.error("Could not use stale cache:", error);
+                    }
+                }
+
+                throw new Error(`HTTP error! status: ${resp.status}`);
+            }
+
+            const data = await resp.json();
+
+            localStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    timestamp: Date.now(),
+                    data: data
+                })
+            );
+
+            if (enableLogging) {
+                console.log(`Cached fresh data for: ${url}`);
+            }
+
+            return data;
+
+        } catch (error) {
+            // Covers fetch/network errors too
+            if (cachedRaw) {
+                try {
+                    const cached = JSON.parse(cachedRaw);
+
+                    console.warn(
+                        `Network/API error. Using stale cache for: ${url}`
+                    );
+
+                    return cached.data;
+                } catch (cacheError) {
+                    console.error("Could not read cached data:", cacheError);
+                }
+            }
+
+            throw error;
+        }
     }
 
     document.querySelectorAll(".stack-card").forEach(async function (el) {

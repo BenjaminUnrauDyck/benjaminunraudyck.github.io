@@ -1,5 +1,5 @@
 
-export const githubUsername = "BenjaminUnrauDyck";
+export const githubUsername = "BenjaminUnrau";
 
 export const Name = "Benjamin";
 export const LastName = "Unrau Dyck";
@@ -15,20 +15,20 @@ export const metaAuthor = "Benjamin Unrau Dyck";
 // Contact information
 export const contactInfo = `I'm just an email or a message away on any platform. Send me an email at ${mail}, or find me on LinkedIn, Twitter, Facebook, or Instagram. Let’s start a conversation about your ideas or just enjoy a casual chat.`;
 
-export const bio = [
+/*export const bio = [
     "Discover Benjamin Unrau Dyck.",
-    `I am a 23-year-old Computer Science student with a strong foundation in software development, specializing in backend technologies.`,
+    `I am a 25-year-old Computer Science student with a strong foundation in software development, specializing in backend technologies.`,
 `I have a keen interest in AI, cybersecurity, and open source technology.`,
 `My multilingual skills in German, English, and Spanish, combined with my growing technical expertise, make me a valuable asset in diverse, collaborative environments.`,
     "Thank you for exploring my journey and contributions to the tech world!",
-];
+];*/
 
-export const languages = [
+/*export const languages = [
 
     {
         title: "German Communication",
         skillName: "German ",
-        color: "1",
+        color: "2",
         percentage: "100",
     }, {
         title: "English Communication",
@@ -38,10 +38,10 @@ export const languages = [
     }, {
         title: "Spanish Communication",
         skillName: "Spanish",
-        color: "3",
+        color: "2",
         percentage: "90",
     }
-];
+];*/
 
 export const skills = {
     "Programming and Scripting Languages": [
@@ -53,19 +53,28 @@ export const skills = {
             "skillName": "Java",
             "imagePath": "images/skills/java_logo.png",
         },
+        {
+            "skillName": "C",
+            "imagePath": "images/skills/c-program-icon.svg",
+        },
     ],
     "Database Management Systems": [
         {
             "skillName": "PostgreSQL",
             "imagePath": "images/skills/Postgresql_elephant.svg",
-            "description": "A relational database management system used for storing and retrieving data efficiently."
+            //"description": "A relational database management system used for storing and retrieving data efficiently."
+        },
+        {
+            "skillName": "OracleSQL",
+            "imagePath": "images/skills/Oracle_SQL.svg",
+            //"description": "A relational database management system used for storing and retrieving data efficiently."
         },
     ],
     "Version Control and CI/CD Tools": [
         {
             "skillName": "Git",
             "imagePath": "images/skills/git_logo.png",
-            "description": "Version control system to track changes in source code during software development."
+            //"description": "Version control system to track changes in source code during software development."
         },
     ]
 };
@@ -86,14 +95,19 @@ export const certifications = {
         },*/
         {
             certificationName: "Introduccion al Aseguramiento de la Calidad y Automatizacion",
-            image: "images/Certifications/bFP_UNA/Benjamin Unrau.jpg",
-            preview: "https://benjaminunraudyck.github.io/images/Certifications/bFP_UNA/Benjamin Unrau.jpg.jpg"
+            image: "images/Certifications/bFP_UNA/Curso de Invierno Benjamin Unrau.jpg",
+            preview: "images/Certifications/bFP_UNA/Curso de Invierno Benjamin Unrau.jpg"
+        },
+        {
+            certificationName: "ISTQB Foundational level",
+            image: "images/Certifications/bFP_UNA/istqb-preview.png",
+            preview: "images/Certifications/bFP_UNA/istqb.pdf"
         },
     ]
 }
 
 
-export const experience = [
+/*export const experience = [
     {
         title: "WPG S.R.L",
         duration: "May 2024 - Present",
@@ -106,9 +120,9 @@ export const experience = [
         tags: ["Software Testing", "Software Development", "Automation", "Machine Learning", "Documentation"],
         icon: "globe",
     }
-];
+];*/
 
-export const education = [
+/*export const education = [
     {
         title: "Bachelor’s Degree in Computer Science",
         duration: "July 2021 - present",
@@ -143,7 +157,7 @@ export const education = [
         ],
         icon: "graduation-cap",
     },
-];
+];*/
 
 export const testimonials = {
     reviewer: "Anonymous Colleagues",
@@ -157,45 +171,29 @@ export const testimonials = {
 
 export const footer = [
     {
-        label: "Dev Profiles",
+        key: "devProfiles",
         data: [
             {
                 text: "GitHub",
-                link: "https://github.com/BenjaminUnrauDyck",
+                link: "https://github.com/BenjaminUnrau",
             },
         ],
     },
+
     {
-        label: "Resources",
+        key: "socialProfiles",
         data: [
             {
-                text: "send me a mail",
-                link: "mailto:benjaminunrau07@gmail.com",
-            },
-            {
-                text: "Download Resume",
-                link: "assets\\Benjamin_UnrauDyck.pdf",
-                target: "_blank"
-            }
-        ],
-    },
-    {
-        label: "Social Profiles",
-        data: [
-            {
-                text: "Linkedin",
+                text: "LinkedIn",
                 link: "https://www.linkedin.com/in/benjamin-unrau-dyck/",
             },
             {
-                text: "Whatsapp",
+                text: "WhatsApp",
                 link: "https://wa.me/595986361808",
-            },
-            {
-                text: "Instagram",
-                link: "https://www.instagram.com/ivan_weiss_van_der_pol/",
             },
         ],
     },
+
     {
         label: "copyright-text",
         data: [
@@ -204,3 +202,13 @@ export const footer = [
         ],
     },
 ];
+
+export const footerLinks = {
+    email: "mailto:benjaminunrau07@gmail.com",
+
+    resume: {
+        en: "assets/Benjamin_Unrau_EN.pdf",
+        de: "assets/Benjamin_Unrau_DE.pdf",
+        es: "assets/Benjamin_Unrau_ES.pdf"
+    }
+};

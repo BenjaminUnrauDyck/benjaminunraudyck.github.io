@@ -9,7 +9,7 @@
    <meta name="keywords" content="">
    <meta name="author" content="">
 
-   <link rel="icon" type="image/png" href="/images/face.png">
+   <link rel="icon" type="image/png" href="images/logo/b (3).png">
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;700&family=Playfair+Display:wght@400;400i;700&family=Montserrat|Open+Sans|Raleway&display=swap" rel="stylesheet">
@@ -23,11 +23,11 @@
    <!-- Modernizr JS -->
    <script src="js/modernizr-2.6.2.min.js" defer></script>
    <script type="module" src="index.js" defer></script>
-   <script src="js/theme.js" defer></script>
+<!--<script src="js/theme.js" defer></script>--> 
    <script src="js/profile-card.js" defer></script>
 
 </head>
-<body id="theme-style" class="theme-ocean-breeze">
+<body id="theme-style" class="theme-forest-harmony">
    <div id="colorlib-page">
       <div class="container-wrap">
          <a href="#" class="js-colorlib-nav-toggle colorlib-nav-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar"><i></i></a>
@@ -52,7 +52,17 @@
                      <li><a href="#" data-nav-section="testimonials">Testimonials</a></li>
                      <li><a href="#" data-nav-section="contact">Contact</a></li>
                      <li>
-                        <select id="theme-selector">
+                        <select id="language-selector">
+                           <option value="en">English</option>
+                           <option value="de">Deutsch</option>
+                           <option value="es">Español</option>
+                        </select>
+                     </li>
+                     <li>
+                        <select id="project-selector">
+                           <option value="" selected disabled>Projects</option>
+                           <option value="https://benjaminunrau.github.io/guarani-shadowing">Guarani-Shadowing</option>
+                           <option value="https://benjaminunrau.github.io/mesh">Mesh Comms pre-MVP</option>
                         </select>
                      </li>
                   </ul>
@@ -77,9 +87,15 @@
             <!--------------------[START] prof summary------------------------>
             <section class="colorlib-profile" data-section="profile-card">
                <div class="colorlib-narrow-content">
-                  <div class="row row-bottom-padded-sm animate-box" data-animate-effect="fadeInLeft">
+                  <div class="row row-bottom-padded-sm animate-box"
+                  data-animate-effect="fadeInLeft">
                      <div class="profile-cards">
-                        <div id="github-card" class="github-card"></div>
+                        <div
+                           id="github-card"
+                           class="github-card"
+                           username="BenjaminUnrau">
+                        </div>
+
                      </div>
                   </div>
                </div>

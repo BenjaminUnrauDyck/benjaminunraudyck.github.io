@@ -1,7 +1,9 @@
 import {
-    Name, LastName, FullName, mail, metaTitle, metaDescription, metaKeywords, metaAuthor, contactInfo, githubUsername, bio, languages, certifications, education, experience, footer, skills, testimonials
+    Name, LastName, FullName, mail, metaTitle, metaDescription, metaKeywords, metaAuthor, contactInfo, githubUsername, /*bio,*/ /*languages,*/ certifications, /*education, experience,*/ footer, footerLinks, skills, testimonials
 } from './data.js';
 import { URLs } from './user-data/urls.js';
+import { translations } from './translations.js';
+
 
 const enableLogging = true; // Set this to false to disable logs
 
@@ -61,7 +63,7 @@ function createLanguageSkillElement(language) {
     if (enableLogging) console.log('Creating language skill element:', language);
     const { skillName, color, percentage } = language;
     const skillContainer = createElement('div', {
-        className: 'col-md-6 animate-box',
+        className: 'col-md-6',
         children: [
             ['div', {
                 className: 'progress-wrap',
@@ -327,13 +329,13 @@ function createFooterItem(item) {
 
 /**
  * Create and return a GitHub card element.
- */
+ 
 function createGitHubCard(username) {
     if (enableLogging) console.log('Creating GitHub card for username:', username);
     const githubCardDiv = document.getElementById('github-card');
     githubCardDiv.setAttribute('username', username);
     return githubCardDiv;
-}
+}*/
 
 /**
  * Create and return a category element.
@@ -449,9 +451,114 @@ function populatePersonalInfo(fullNameId, emailId, contactInfoId, fullName, emai
     emailElement.setAttribute('href', `mailto:${email}`);
     document.getElementById(contactInfoId).textContent = contactInfo;
 }
+function applyLanguage(language) {
+    const t = translations[language];
+    const translatedFooter = [
+        {
+            label: t.content.footer.devProfiles,
+            data: footer[0].data
+        },
+
+        {
+            label: t.content.footer.socialProfiles,
+            data: footer[1].data
+        },
+
+        {
+            label: t.content.footer.resources,
+            data: [
+                {
+                    text: t.content.footer.sendMail,
+                    link: footerLinks.email
+                },
+                {
+                    text: t.content.footer.downloadResume,
+                    link: footerLinks.resume[language],
+                    target: "_blank"
+                }
+            ]
+        },
+
+        footer[2]
+    ];
+
+    populateContainer("footer", translatedFooter, createFooterItem);
+    populateContainer('bio', t.content.bio, createBioItem); 
+    populateContainer(
+        'languages',
+        t.content.languages,
+        createLanguageSkillElement
+    );
+
+    populateContainer(
+        'experience',
+        t.content.experience,
+        createExperienceItem
+    );
+        // Education
+    populateContainer(
+        'education',
+        t.content.education,
+        createEducationItem
+    );
+    document.getElementById('contact-info').textContent =
+        t.content.contactInfo;
+
+    document.documentElement.lang = language;
+
+    document.querySelector('[data-nav-section="about"]').textContent =
+        t.nav.about;
+
+    document.querySelector('[data-nav-section="languages"]').textContent =
+        t.nav.languages;
+
+    document.querySelector('[data-nav-section="skills"]').textContent =
+        t.nav.skills;
+
+    document.querySelector('[data-nav-section="certifications"]').textContent =
+        t.nav.certifications;
+
+    document.querySelector('[data-nav-section="experience"]').textContent =
+        t.nav.experience;
+
+    document.querySelector('[data-nav-section="education"]').textContent =
+        t.nav.education;
+
+    document.querySelector('[data-nav-section="testimonials"]').textContent =
+        t.nav.testimonials;
+
+    document.querySelector('[data-nav-section="contact"]').textContent =
+        t.nav.contact;
+
+    document.querySelector('[data-section="about"] h1').textContent =
+        t.headings.about;
+
+    document.querySelector('[data-section="languages"] h1').textContent =
+        t.headings.languages;
+
+    document.querySelector('[data-section="skills"] h1').textContent =
+        t.headings.skills;
+
+    document.querySelector('[data-section="certifications"] h1').textContent =
+        t.headings.certifications;
+
+    document.querySelector('[data-section="experience"] h1').textContent =
+        t.headings.experience;
+
+    document.querySelector('[data-section="education"] h1').textContent =
+        t.headings.education;
+
+    document.querySelector('[data-section="testimonials"] h1').textContent =
+        t.headings.testimonials;
+
+    document.querySelector('[data-section="contact"] h1').textContent =
+        t.headings.contact;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     try {
+        
+        console.log('DOMContentLoaded fired');
         if (enableLogging) console.log('Document loaded, initializing...');
 
         // Set meta tags
@@ -461,13 +568,13 @@ document.addEventListener("DOMContentLoaded", () => {
         populatePersonalInfo('fullname', 'email', 'contact-info', FullName, mail, contactInfo, enableLogging);
 
         // Create GitHub card
-        createGitHubCard(githubUsername);
+        //createGitHubCard(githubUsername);
         // fetchData(URLs.gitConnected, mapBasicResponse);
         // Populate bio
-        populateContainer('bio', bio, createBioItem);
+        //populateContainer('bio', bio, createBioItem);
 
         // Populate languages
-        populateContainer('languages', languages, createLanguageSkillElement);
+       // populateContainer('languages', languages, createLanguageSkillElement);
 
         // Populate skills accordion
         populateSkillsAccordion('skills-accordion', skills, enableLogging);
@@ -475,20 +582,41 @@ document.addEventListener("DOMContentLoaded", () => {
         // Populate certifications accordion
         populateCertificationsAccordion('accordion', certifications, enableLogging);
 
-        // Populate experience
-        populateContainer('experience', experience, createExperienceItem);
-
-        // Populate education
-        populateContainer('education', education, createEducationItem);
-
         // Populate testimonials
         populateTestimonials('testimonialItems', testimonials.feedback, enableLogging);
 
         // Populate footer
-        populateContainer('footer', footer, createFooterItem);
+        //populateContainer('footer', footer, createFooterItem);
 
         // Initialize carousel
         initializeCarousel('#testimonialCarousel', 'prevTestimonial', 'nextTestimonial', 3000, enableLogging);
+
+        const languageSelector = document.getElementById('language-selector');
+
+        const savedLanguage = localStorage.getItem('language') || 'en';
+        languageSelector.value = savedLanguage;
+
+        applyLanguage(savedLanguage);
+
+        languageSelector.addEventListener('change', (event) => {
+            const language = event.target.value;
+
+            localStorage.setItem('language', language);
+            applyLanguage(language);
+
+        const projectSelector = document.getElementById('project-selector');
+        console.log('projectSelector:', projectSelector);
+
+        projectSelector.addEventListener('change', (event) => {
+            const projectUrl = event.target.value;
+
+            if (projectUrl) {
+                window.open(projectUrl, '_blank');
+            }
+
+            projectSelector.value = '';
+        });
+});
 
     } catch (error) {
         console.error(`Error during initialization: ${error.message}`);

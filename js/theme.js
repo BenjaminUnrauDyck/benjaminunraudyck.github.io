@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const themeSelector = document.getElementById('theme-selector');
-    const defaultTheme = 'theme-ocean-breeze'; // Define the default theme
+    const defaultTheme = 'forest-harmony'; // Define the default theme
   
     // Function to fetch and parse the CSS file
     async function loadCSSThemes(cssPath) {

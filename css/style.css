@@ -11,7 +11,7 @@
 }
 
 /* General styling for the select dropdown */
-#theme-selector {
+#language-selector {
     display: flex;                   /* Ensure the dropdown fills the container width */
     width: 100%;                      /* Make the select element full width */
     padding: 8px 16px;                /* Padding for better text visibility and click area */
@@ -27,7 +27,7 @@
 }
 
 /* Style the dropdown arrow using a background image (you can use a custom arrow image) */
-#theme-selector {
+#language-selector {
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5H7z%22%20fill%3D%22%23333%22%3E%3C/path%3E%3C/svg%3E');
     background-repeat: no-repeat;
     background-position: right 10px center;  /* Position the arrow to the right */
@@ -35,22 +35,55 @@
 }
 
 /* Optional: style for hover state */
-#theme-selector:hover {
+#language-selector:hover {
     border-color: #888;                     /* Darker border on hover for visual feedback */
 }
 
 /* Focus styles to improve accessibility */
-#theme-selector:focus {
+#language-selector:focus {
     border-color: #0056b3;                  /* Blue border on focus for visibility */
     outline: none;                          /* Remove default focus outline */
 }
 
 /* Disable state styling, if needed */
-#theme-selector:disabled {
+#language-selector:disabled {
     background-color: #eee;                 /* Gray out when disabled */
     color: #666;                            /* Lighten text color when disabled */
 }
 
+#project-selector {
+    display: flex;                   /* Ensure the dropdown fills the container width */
+    width: 100%;                      /* Make the select element full width */
+    padding: 8px 16px;                /* Padding for better text visibility and click area */
+    margin: 10px 10px  0;                   /* Add some margin around the select to separate it from other elements */
+    font-size: 16px;                  /* Increase the font size for better readability */
+    line-height: 1.5;                 /* Line height for better text alignment */
+    border: 2px solid #ccc;           /* Subtle border color */
+    border-radius: 8px;               /* Rounded corners */
+    background-color: #fff;           /* White background for the dropdown */
+    color: #333;                      /* Dark color for text for better readability */
+    appearance: none;                 /* Remove default system styling */
+    cursor: pointer;                  /* Cursor pointer to indicate it's selectable */
+}
+
+/* Style the dropdown arrow using a background image (you can use a custom arrow image) */
+#project-selector {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5H7z%22%20fill%3D%22%23333%22%3E%3C/path%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 10px center;  /* Position the arrow to the right */
+    background-size: 24px 24px;             /* Size of the arrow */
+}
+
+/* Optional: style for hover state */
+#project-selector:hover {
+    border-color: #888;                     /* Darker border on hover for visual feedback */
+}
+
+/* Focus styles to improve accessibility */
+#project-selector:focus {
+    border-color: #0056b3;                  /* Blue border on focus for visibility */
+    outline: none;                          /* Remove default focus outline */
+}
 
 @font-face {
 	font-family: "icomoon";
@@ -2489,14 +2522,22 @@ span {
 
 
 footer {
-	font-size: 13px;
-	background: var(--background-light);
-	padding: 2em 4em;
-	/* display: flex; */
-	align-items: start;
-	justify-content: center;
-	gap: 1em;
-	border-radius: 5px;
+    font-size: 13px;
+    background: var(--background-light);
+    padding: 2em 4em;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 3em;
+
+    border-radius: 5px;
+}
+
+
+
+footer > div:not(.col) {
+    flex-basis: 100%;
 }
 
 footer ul {
@@ -2505,9 +2546,8 @@ footer ul {
 }
 
 .col {
-	flex: 1;
-	margin: 0 30px;
-	display: inline-grid;
+    margin: 0;
+    min-width: 140px;
 }
 
 .col-title {
